@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.impute import KNNImputer
 
 # we need to combine all of the training and testing data
 train_df = pd.read_csv('Titanic/train.csv')
@@ -101,6 +101,7 @@ dsec_table.plot(title='Survived = 1 | Embarked = C', kind='bar')
 data_survived_embarked_q = data_survived[data_survived['Embarked']=='Q']
 dseq_table = data_survived_embarked_q.pivot_table(index="Sex", values="Fare")
 dseq_table.plot(title='Survived = 1 | Embarked = Q', kind='bar')
+
 plt.show()
 
 #===================================================================================================
@@ -130,15 +131,44 @@ print(data['Sex'].value_counts())
 # QUESTION 17
 # convert missing ages to k nearest to find top-k
 #===================================================================================================
-# knn = KNeighborsClassifier(n_neighbors=3)
-# xtrain = train_df.drop('Age', axis=1)
-# xtrain = xtrain.drop('Name', axis=1)
-# xtrain = xtrain.drop('Ticket', axis=1)
-# xtrain = xtrain.drop('Cabin', axis=1)
-# xtrain = xtrain.drop('Embarked', axis=1)
-# xtrain = xtrain.drop('Sex', axis=1)
-# xtrain = xtrain.dropna()
-# ytrain = data['Age']
-# knn.fit(xtrain, ytrain)
-# print(knn.score(train_df['Survived'], data['Age']))
+imputer = KNNImputer()
+age_filled = imputer.fit_transform(data[['Age']])
+data['age_complete'] = age_filled
+# print(np.argwhere(np.isnan(data['Age'])))
+# print(np.argwhere(np.isnan(age_filled)))
+print(data['Age'].isna().value_counts())
+print(data['age_complete'].isna().value_counts())
 
+#===================================================================================================
+# QUESTION 18
+# convert missing embarked valued to the most common value
+#===================================================================================================
+train_df['embarked_complete'] = train_df['Embarked'].fillna(train_df['Embarked'].mode()[0])
+print(train_df['Embarked'].isna().value_counts())
+print(train_df['embarked_complete'].isna().value_counts())
+print(train_df['Embarked'].value_counts())
+print(train_df['embarked_complete'].value_counts())
+
+
+#===================================================================================================
+# QUESTION 19
+# convert missing embarked valued to the most common value
+#===================================================================================================
+test_df['fare_complete'] = test_df['Fare'].fillna(test_df['Fare'].mode()[0])
+print(test_df['Fare'].isna().value_counts())
+print(test_df['fare_complete'].isna().value_counts())
+print(test_df['Fare'].value_counts())
+print(test_df['fare_complete'].value_counts())
+
+#===================================================================================================
+# QUESTION 20
+# convert Fare to ordinal values based on the following FareBands
+#       Ordinal  |  FareBand
+#           0    |  -0.001 - 7.91
+#           1    |  7.91 - 14.454
+#           2    |  14.454 - 31.0
+#           3    |  31.0 - 512.329
+#===================================================================================================
+farebands = {0,1,2,3}
+train_df['farebands'] = pd.qcut(train_df['Fare'], q=4, labels=farebands)
+print(train_df['farebands'])
