@@ -9,26 +9,27 @@ from sklearn.tree import export_graphviz
 from sklearn.externals.six import StringIO
 from IPython.display import Image
 import pydotplus
+from chefboost import Chefboost as chef
 
-# train_data = {'Home': [1,0,1,1,0,1,1,0,0,1,0,0,0,1,1,1,1,0,1,1,1,1,1,0],
-        # 'Top25': [0,0,1,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,1],
-        # 'NBC': [1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0],
-        # 'ESPN': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        # 'FOX': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        # 'ABC': [0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-        # 'CBS': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-        # 'Win': [1,1,1,1,0,1,1,1,1,1,1,0,0,1,0,0,1,0,0,1,0,1,0,0]
-        # }
+train_data = {'Home': [1,0,1,1,0,1,1,0,0,1,0,0,0,1,1,1,1,0,1,1,1,1,1,0],
+        'Top25': [0,0,1,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,1],
+        'NBC': [1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0],
+        'ESPN': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        'FOX': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'ABC': [0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        'CBS': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        'Win': [1,1,1,1,0,1,1,1,1,1,1,0,0,1,0,0,1,0,0,1,0,1,0,0]
+        }
 
-# test_data = {'Home': [1,1,0,0,1,0,1,1,1,0,1,0],
-        # 'Top25': [0,1,0,0,0,0,1,0,0,1,0,1],
-        # 'NBC': [1,1,0,0,1,0,1,1,1,0,1,0],
-        # 'ESPN': [0,0,1,0,0,0,0,0,0,0,0,0],
-        # 'FOX': [0,0,0,1,0,0,0,0,0,0,0,0],
-        # 'ABC': [0,0,0,0,0,1,0,0,0,1,0,1],
-        # 'CBS': [0,0,0,0,0,0,0,0,0,0,0,0],
-        # 'Win': [1,0,1,1,1,1,1,1,1,0,1,0]
-        # }
+test_data = {'Home': [1,1,0,0,1,0,1,1,1,0,1,0],
+        'Top25': [0,1,0,0,0,0,1,0,0,1,0,1],
+        'NBC': [1,1,0,0,1,0,1,1,1,0,1,0],
+        'ESPN': [0,0,1,0,0,0,0,0,0,0,0,0],
+        'FOX': [0,0,0,1,0,0,0,0,0,0,0,0],
+        'ABC': [0,0,0,0,0,1,0,0,0,1,0,1],
+        'CBS': [0,0,0,0,0,0,0,0,0,0,0,0],
+        'Win': [1,0,1,1,1,1,1,1,1,0,1,0]
+        }
 
 test_train_data = {'Home': [1,0,1,1,0,1,1,0,0,1,0,0,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,0,1,0,1,1,1,0,1,0],
         'Top25': [0,0,1,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1],
@@ -40,18 +41,27 @@ test_train_data = {'Home': [1,0,1,1,0,1,1,0,0,1,0,0,0,1,1,1,1,0,1,1,1,1,1,0,1,1,
         'Win':[1,1,1,1,0,1,1,1,1,1,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,1,1,1,0,1,0]
         }
 
+df_train = pd.DataFrame(data=train_data)
+df_test = pd.DataFrame(data=test_data)
 df_test_train = pd.DataFrame(data=test_train_data)
 
 def main():
+    # config = {'algorithm': 'ID3'}
+    # test_instance = [1,0,1,0,0,0,0,1]
+    # model = chef.fit(df_train, config)
+    # prediction = chef.predict(model, test_instance)
+    # print(prediction)
+
     feature_cols = ['Home', 'Top25', 'NBC', 'ESPN', 'FOX', 'ABC', 'CBS']
-    X = df_test_train[feature_cols]
-    y = df_test_train.Win
-    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=(14/38),random_state=None)
+    x_train = df_train[feature_cols]
+    y_train = df_train.Win
+    x_test = df_test[feature_cols]
+    y_test = df_test.Win
     clf = DecisionTreeClassifier(criterion="entropy")
-    clf = clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    print('X_train',X_train)
-    print('X_test',X_test)
+    clf = clf.fit(x_train, y_train)
+    y_pred = clf.predict(x_test)
+    print('x_train',x_train)
+    print('x_test',x_test)
     print(y_pred)
     print('Accuracy:',metrics.accuracy_score(y_test,y_pred))
     dot_data = StringIO()
